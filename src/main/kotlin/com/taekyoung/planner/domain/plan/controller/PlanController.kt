@@ -1,17 +1,15 @@
 package com.taekyoung.planner.domain.plan.controller
 
-import com.taekyoung.planner.domain.plan.comment.dto.CommentResponse
 import com.taekyoung.planner.domain.plan.dto.PlanDetailResponse
 import com.taekyoung.planner.domain.plan.dto.PlanRequest
 import com.taekyoung.planner.domain.plan.dto.PlanResponse
 import com.taekyoung.planner.domain.plan.dto.UpdatePlanRequest
 import com.taekyoung.planner.domain.plan.model.PlanStatus
 import com.taekyoung.planner.domain.plan.model.SearchType
-import com.taekyoung.planner.domain.plan.service.PlanService
+import com.taekyoung.planner.domain.plan.service.PlanServiceImpl
 import com.taekyoung.planner.infra.security.MemberPrincipal
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,7 +19,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/plans")
 @RestController
 class PlanController(
-    private val planService: PlanService,
+    private val planService: PlanServiceImpl,
 //    private val preA
 ) {
 
