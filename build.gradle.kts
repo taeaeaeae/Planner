@@ -58,6 +58,8 @@ dependencies {
     testImplementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     testImplementation("com.fasterxml.jackson.core:jackson-databind")
 
+    implementation("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
+
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")
 
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
