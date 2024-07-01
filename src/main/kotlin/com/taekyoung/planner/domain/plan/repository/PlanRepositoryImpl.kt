@@ -1,7 +1,5 @@
 package com.taekyoung.planner.domain.plan.repository
 
-import com.querydsl.core.types.ExpressionUtils.orderBy
-import com.querydsl.core.types.Order
 import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.core.types.dsl.*
 import com.querydsl.jpa.impl.JPAQuery
@@ -13,7 +11,6 @@ import com.taekyoung.planner.infra.querydsl.QueryDslSupport
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -81,8 +78,8 @@ class PlanRepositoryImpl : QueryDslSupport(), CustomPlanRepository {
         return keyword?.let { plan.content.contains(it) }
     }
 
-    private fun writerContains(keyword: String?): BooleanExpression? {
-        return keyword?.let { plan.member.name.contains(it) }
+    private fun writerEq(keyword: String?): BooleanExpression? {
+        return keyword?.let { plan.member.name.eq(it) }
     }
 
     private fun status(status: PlanStatus?): BooleanExpression? {
@@ -93,7 +90,7 @@ class PlanRepositoryImpl : QueryDslSupport(), CustomPlanRepository {
         return when (searchType) {
             SearchType.TITLE -> titleContains(keyword)
             SearchType.CONTENT -> contentContains(keyword)
-            SearchType.WRITER -> writerContains(keyword)
+            SearchType.WRITER -> writerEq(keyword)
             else -> null
         }
     }
