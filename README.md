@@ -298,7 +298,7 @@ PUT|200|/plans/comment /{commentId}|{"content":"String"}||{  "planId":"Long",  "
 DELETE|204|/plans/comment /{commentId}|||
 POST|200|/auth/signup|{  "email":"String",  "password":"String",   "name":"String",  "role": "MemberRole",  "imageUrl": "String" }||{  "memberId":"Long",  "email":"String",  "name":"String",  "imageUrl":"String" }
 POST|200|/auth/signin|{  "email":"String",  "password":"String" }||{ "accessToken":"String" } 
-
+POST|200|/upload||||url
 
 ## 개발 도구 및 환경
 
