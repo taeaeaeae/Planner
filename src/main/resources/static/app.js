@@ -1,5 +1,5 @@
 //app.js
-const apiUrl = 'http://127.0.0.1:8081/upload'; // 백엔드 API 엔드포인트
+const apiUrl = '/upload'; // 백엔드 API 엔드포인트
 
 function uploadImage() {
     const fileInput = document.getElementById('fileInput');
