@@ -1,11 +1,9 @@
 package com.taekyoung.planner.domain.plan.repository
 
+import com.querydsl.core.types.ExpressionUtils.orderBy
 import com.querydsl.core.types.Order
 import com.querydsl.core.types.OrderSpecifier
-import com.querydsl.core.types.dsl.BooleanExpression
-import com.querydsl.core.types.dsl.EntityPathBase
-import com.querydsl.core.types.dsl.Expressions
-import com.querydsl.core.types.dsl.PathBuilder
+import com.querydsl.core.types.dsl.*
 import com.querydsl.jpa.impl.JPAQuery
 import com.taekyoung.planner.domain.plan.model.Plan
 import com.taekyoung.planner.domain.plan.model.PlanStatus
@@ -30,17 +28,26 @@ class PlanRepositoryImpl : QueryDslSupport(), CustomPlanRepository {
     ): Page<Plan> {
 
 
-//        val sort = getOrder(order)
-//        return queryFactory.selectFrom(plan).where(search(type, keyword), status(status)).offset(pageable.offset)
-//            .limit(pageable.pageSize.toLong())
-//            .orderBy(sort)
-//            .fetch()
+        val sort = getOrder(order)
 
-        return paging(pageable, plan) {
-            queryFactory.selectFrom(plan)
-                .where(deleteAtIsNull(), search(type, keyword), status(status))
-//                .orderBy(plan.createdAt.desc())
-        }
+        val totalCount = queryFactory
+            .select(plan.count()).from(plan)
+            .fetchOne() ?: 0L
+
+        val result = queryFactory
+            .selectFrom(plan).where(deleteAtIsNull(), search(type, keyword), status(status))
+            .orderBy(sort)
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong()).fetch()
+
+        return PageImpl(result, pageable, totalCount)
+
+
+//        return paging(pageable, plan) {
+//            queryFactory.selectFrom(plan)
+//                .where(deleteAtIsNull(), search(type, keyword), status(status))
+////                .orderBy(plan.createdAt.desc())
+//        }
     }
 
     fun getOrder(order: String?): OrderSpecifier<*> {
@@ -99,6 +106,7 @@ fun <T> paging(pageable: Pageable, path: EntityPathBase<T>, baseQueryFunc: () ->
     val totalCount = baseQuery
         .select(path.count())
         .fetchOne() ?: 0L
+
     val result = baseQuery
         .select(path)
         .offset(pageable.offset)
