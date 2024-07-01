@@ -135,13 +135,106 @@
 
 <details>
 <summary> Controller 테스트 코드 작성 </summary><div>
+- MockMvc 를 사용해서 Controller 테스트 코드 작성
 
+  <details>
+  
+  ```kotlin
 
+  @SpringBootTest
+  @AutoConfigureMockMvc
+  @ExtendWith(MockKExtension::class)
+  class PlanControllerTest @Autowired constructor(
+      private val mockMvc: MockMvc,
+      private val tokenProvider: TokenProvider,
+      private val objectMapper: ObjectMapper = jacksonObjectMapper().registerKotlinModule()
+          .registerModule(JavaTimeModule()),
+  ) : DescribeSpec({
+      extensions(SpringExtension)
+      afterContainer { clearAllMocks() }
+      val planService = mockk<PlanServiceImpl>()
+  
+      describe("POST /plans는") {
+          context("정상값을보낼때") {
+              it("201을 보내야함") {
+                  val request = PlanRequest(
+                      title = "test_title",
+                      content = "abc"
+                  )
+                  val token = tokenProvider.generateAccessToken(
+                      subject = "1",
+                      email = "test@gmail.com",
+                      role = MemberRole.HOST
+                  )
+                  val principal = MemberPrincipal(1, "test@gmail.com", roles = setOf("ROLE_HOST"))
+                  every { planService.createPlan(request, principal.id) } returns PlanResponse(
+                      planId = 1L,
+                      title = "test_title",
+                      content = "abc",
+                      status = PlanStatus.READY,
+                      writer = "test",
+                      createdAt = LocalDateTime.now(),
+                      updatedAt = null
+                  )
+  
+                  val result = mockMvc.perform(
+                      post("/plans")
+                          .accept(MediaType.APPLICATION_JSON)
+                          .contentType(MediaType.APPLICATION_JSON)
+                          .header("Authorization", "Bearer $token")
+                          .content(jacksonObjectMapper().writeValueAsString(request))
+                  ).andReturn()
+  
+                  result.response.status shouldBe 201
+  
+                  val responseDto = objectMapper.readValue(
+                      result.response.contentAsString,
+                      PlanResponse::class.java
+                  )
+                  responseDto.status shouldBe PlanStatus.READY
+              }
+          }
+      }
+  }) 
+  ```
+  </details>
 </div></details>
 
 
 <details>
 <summary> Service 테스트 코드 작성 </summary><div>
+- Mockito 을 사용하여 Service 테스트 코드 작성
+
+  <details>
+    
+  ```kotlin
+
+  @SpringBootTest
+  @ExtendWith(MockKExtension::class)
+  class PlanServiceImplTest : BehaviorSpec({
+      extension(SpringExtension)
+      afterContainer { clearAllMocks() }
+      val planRepository = mockk<PlanRepository>()
+      val commentRepository = mockk<CommentRepository>()
+      val memberRepository = mockk<MemberRepository>()
+  
+      val planService = PlanServiceImpl(planRepository, commentRepository, memberRepository)
+  
+      Given("plan 목록이 존재하지 않을때") {
+          When("특정 plan조회를 요청하면") {
+              Then("ModelNotFoundException이 발생해야 한다.") {
+                  val planId = 100L
+                  every { planRepository.findByIdAndDeletedAtIsNull(any()) } returns null
+  
+                  shouldThrow<ModelNotFoundException> {
+                      planService.getPlanById(planId)
+                  }
+              }
+          }
+      }
+  })
+  ```
+  </details>
 
 
 </div></details>
@@ -149,7 +242,35 @@
 
 <details>
 <summary> Repository 테스트 코드 작성 </summary><div>
+- @DataJpaTest 를 사용해서 Repository 테스트 코드 작성
+  
+  <details>
 
+  ```kotlin
+
+  @DataJpaTest
+  @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+  @Import(value = [QueryDslConfig::class, JPAConfig::class])
+  @ActiveProfiles("test")
+  class PlanRepositoryTest @Autowired constructor(
+      private val planRepository: PlanRepository,
+      private val membersRepository: MemberRepository,
+  ) {
+      @Test
+      fun `SearchType 이 null 이 아닌 경우 Keyword가 포함된것들이 검색되는지 결과 확인`() {
+          // GIVEN
+          membersRepository.saveAndFlush(MEMBER)
+          planRepository.saveAllAndFlush(DEFAULT_PLAN_LIST)
+  
+          // WHEN
+          val result = planRepository.findByAll(PageRequest.of(0, 10), null, SearchType.TITLE, "test1", null)
+  
+          // THEN
+          result.content.size shouldBe 3
+      }
+  ```
+  
+  </details>
 
 </div></details>
 
