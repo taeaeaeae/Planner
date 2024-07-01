@@ -50,6 +50,109 @@
 
 ## 개선내용
 
+<details>
+<summary>  Controller, Service 패키지 내 클래스 개선 </summary><div>
+- Controller Advice 로 예외 공통화 처리
+  
+  > GlobalExceptionHandler::class에 @RestControllerAdvice 사용하여 예외 공통화
+  
+- Service 인터페이스와 구현체 분리하여 추상화
+  > CRUD 메서드 추상화
+
+</div></details>
+
+
+<details>
+<summary>  CustomException 정의 및 SpringAOP 적용 </summary><div>
+- CustomException 정의
+  > RuntimeException 사용하여 ModelNotFoundㄷException 정의
+
+
+</div></details>
+
+
+
+<details>
+<summary>  QueryDSL 을 사용하여 검색 기능 만들기 </summary><div>
+
+- booleanExpression 이용하여 검색
+
+```kotlin
+  .where(deleteAtIsNull(), search(type, keyword), status(status))
+```
+
+</div></details>
+
+
+<details>
+<summary>  다양한 조건을 동적 쿼리로 처리 </summary><div>
+
+
+  
+- SearchType 생성하여 type 분류 후 String으로 키워드 입력받아서 검색기능 처리
+- status에 따른 결과 따로 추가
+
+```kotlin
+    private fun search(searchType: SearchType?, keyword: String?): BooleanExpression? {
+        return when (searchType) {
+            SearchType.TITLE -> titleContains(keyword)
+            SearchType.CONTENT -> contentContains(keyword)
+            SearchType.WRITER -> writerEq(keyword)
+            else -> null
+        }
+    }
+
+ ...
+    //plan 상태에 따른결과
+    private fun status(status: PlanStatus?): BooleanExpression? {
+        return status?.let { plan.status.eq(it) }
+    }
+```
+
+</div></details>
+
+
+<details>
+<summary>  Pageable 을 사용하여 페이징 및 정렬 기능 만들기 </summary><div>
+- Pageable 사용하여 Page 생성
+  
+```kotlin
+        val totalCount = queryFactory
+            .select(plan.count()).from(plan)
+            .fetchOne() ?: 0L
+
+        val result = queryFactory
+            .selectFrom(plan).where(deleteAtIsNull(), search(type, keyword), status(status))
+            .orderBy(sort)
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong()).fetch()
+
+        return PageImpl(result, pageable, totalCount)
+```
+
+</div></details>
+
+
+<details>
+<summary> Controller 테스트 코드 작성 </summary><div>
+
+
+</div></details>
+
+
+<details>
+<summary> Service 테스트 코드 작성 </summary><div>
+
+
+</div></details>
+
+
+<details>
+<summary> Repository 테스트 코드 작성 </summary><div>
+
+
+</div></details>
+
 
 
 ## 프로젝트 구조
