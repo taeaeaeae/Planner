@@ -24,6 +24,7 @@ class PlanRepositoryImpl : QueryDslSupport(), CustomPlanRepository {
         status: PlanStatus?
     ): Page<Plan> {
 
+        println("\\\\\\\\\\${pageable.sort}")
 
         val sort = getOrder(order)
 

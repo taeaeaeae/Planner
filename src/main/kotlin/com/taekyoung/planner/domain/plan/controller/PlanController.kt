@@ -29,7 +29,7 @@ class PlanController(
             page = 0,
             size = 10
         ) pageable: Pageable,
-        @RequestParam order: String?,
+        @RequestParam order: String? = "createAt.desc",
         @RequestParam type: SearchType?,
         @RequestParam keyword: String?,
         @RequestParam status: PlanStatus?
