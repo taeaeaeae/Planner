@@ -63,7 +63,7 @@
 
 
 <details>
-<summary>  CustomException 정의 및 SpringAOP 적용 </summary><div>
+<summary>  CustomException 정의 </summary><div>
 - CustomException 정의
   > RuntimeException 사용하여 ModelNotFoundㄷException 정의
 
